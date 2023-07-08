@@ -1,6 +1,5 @@
 %{
 #include <stdint.h>
-#include "config.h"
 #include "mustache.h"
 #include "mustache-internal.h"
 #include "parser.tab.h"
@@ -11,6 +10,8 @@
 %option noinput
 %option nounput
 %option yylineno
+%option bison-bridge
+%option prefix="mustache_p_"
 
 %x comment
 %x mustag

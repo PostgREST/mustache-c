@@ -12,6 +12,10 @@
 
 #include <mustache.h>
 
+#ifndef TPL_PATH
+#define TPL_PATH ""
+#endif
+
 static FILE *template = NULL;
 
 static uintmax_t
@@ -72,7 +76,7 @@ int main(int ac, char **av)
     mustache_api_t api;
     mustache_template_t *t = NULL;
 
-    template = fopen("simple.template", "r");
+    template = fopen(TPL_PATH "simple.template", "r");
     if (template == NULL) {
         fprintf(stderr, "error: failed to open file simple.template: %s\n",
                 strerror(errno)

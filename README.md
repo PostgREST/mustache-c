@@ -16,14 +16,33 @@ Not supported:
 * HTML escaping
 * Custom delimiters
 
-# Installation
+# Compiling and testing
 
-Simply use the ```configure``` script to compile and install mustache-c:
+Build the library with:
 
 ```shell
-$ ./configure --prefix=/usr
-$ make
-$ sudo make install
+make
+```
+
+Test with:
+
+```shell
+make check
+```
+
+Run the examples:
+
+```shell
+make exarray
+make exsimple
+```
+
+# Installation
+
+Install with:
+
+```
+sudo make install
 ```
 
 mustache-c requires ```flex```, ```bison``` and reasonable modern C

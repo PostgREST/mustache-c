@@ -12,6 +12,10 @@
 
 #include <mustache.h>
 
+#ifndef TPL_PATH
+#define TPL_PATH ""
+#endif
+
 static FILE *template = NULL;
 
 static char *names[] =
@@ -107,7 +111,7 @@ int main(int ac, char **av)
     mustache_api_t api;
     mustache_template_t *t = NULL;
 
-    template = fopen("array.template", "r");
+    template = fopen(TPL_PATH "array.template", "r");
     if (template == NULL) {
         fprintf(stderr, "error: failed to open file array.template: %s\n",
                 strerror(errno)
