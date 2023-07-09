@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <mustache.h>
 #include <mustache-internal.h>
@@ -65,7 +65,7 @@ tpl_token :
 		$$->type                     = TOKEN_TEXT;
 		$$->token_simple.text        = $1;
 		$$->token_simple.text_length = strlen($1);
-		$$->token_simple.escaped     = 1;
+		$$->token_simple.escaped     = true;
 		$$->token_simple.userdata    = NULL;
 		$$->next                     = NULL;
 	}
@@ -74,7 +74,7 @@ tpl_token :
 		$$->type                     = TOKEN_VARIABLE;
 		$$->token_simple.text        = $2;
 		$$->token_simple.text_length = strlen($2);
-		$$->token_simple.escaped     = 0;
+		$$->token_simple.escaped     = false;
 		$$->token_simple.userdata    = NULL;
 		$$->next                     = NULL;
 	}
@@ -83,7 +83,7 @@ tpl_token :
 		$$->type                     = TOKEN_VARIABLE;
 		$$->token_simple.text        = $2;
 		$$->token_simple.text_length = strlen($2);
-		$$->token_simple.escaped     = 0;
+		$$->token_simple.escaped     = false;
 		$$->token_simple.userdata    = NULL;
 		$$->next                     = NULL;
 	}
@@ -92,7 +92,7 @@ tpl_token :
 		$$->type                   = TOKEN_SECTION;
 		$$->token_section.name     = $3;
 		$$->token_section.section  = $5;
-		$$->token_section.inverted = 0;
+		$$->token_section.inverted = false;
 		$$->token_section.userdata = NULL;
 		$$->next                   = NULL;
 
@@ -105,7 +105,7 @@ tpl_token :
 		$$->type                   = TOKEN_SECTION;
 		$$->token_section.name     = $3;
 		$$->token_section.section  = $5;
-		$$->token_section.inverted = 1;
+		$$->token_section.inverted = true;
 		$$->token_section.userdata = NULL;
 		$$->next                   = NULL;
 
@@ -120,7 +120,7 @@ text :
 		$$ = $1;
 	}
 	| text TEXT {    // eat up text duplicates
-		uintmax_t len1, len2;
+		size_t len1, len2;
 
 		len1 = strlen($1);
 		len2 = strlen($2);
@@ -138,9 +138,9 @@ void yyerror(mustache_ctx *ctx, const char *msg){ // {{{
 } // }}}
 
 #ifdef HELPERS
-uintmax_t             mustache_std_strread(mustache_api_t *api, void *userdata, char *buffer, uintmax_t buffer_size){ // {{{
+size_t             mustache_std_strread(mustache_api_t *api, void *userdata, char *buffer, size_t buffer_size){ // {{{
 	char                  *string;
-	uintmax_t              string_len;
+	size_t              string_len;
 	mustache_str_ctx      *ctx               = (mustache_str_ctx *)userdata;
 
 	string     = ctx->string + ctx->offset;
@@ -152,7 +152,7 @@ uintmax_t             mustache_std_strread(mustache_api_t *api, void *userdata, 
 	ctx->offset += string_len;
 	return string_len;
 } // }}}
-uintmax_t             mustache_std_strwrite(mustache_api_t *api, void *userdata, char const *buffer, uintmax_t buffer_size){ // {{{
+size_t             mustache_std_strwrite(mustache_api_t *api, void *userdata, char const *buffer, size_t buffer_size){ // {{{
 	mustache_str_ctx      *ctx               = (mustache_str_ctx *)userdata;
 
 	ctx->string = realloc(ctx->string, ctx->offset + buffer_size + 1);
@@ -168,8 +168,8 @@ uintmax_t             mustache_std_strwrite(mustache_api_t *api, void *userdata,
 mustache_template_t * mustache_compile(mustache_api_t *api, void *userdata){ // {{{
 	mustache_ctx           ctx               = { api, NULL, userdata };
 	char                  *content           = NULL;
-	uintmax_t              content_off       = 0;
-	uintmax_t              ret;
+	size_t              content_off       = 0;
+	size_t              ret;
 
 	while(1){
 		content       = realloc(content, content_off + 1024 + 2); // 2 for terminating EOF of yy
@@ -194,7 +194,7 @@ mustache_template_t * mustache_compile(mustache_api_t *api, void *userdata){ // 
 	}
 	return ctx.template;
 } // }}}
-uintmax_t             mustache_prerender (mustache_api_t *api, void *userdata, mustache_template_t *template){ // {{{
+size_t             mustache_prerender (mustache_api_t *api, void *userdata, mustache_template_t *template){ // {{{
 	mustache_template_t            *p;
 
 	for(p = template; p; p = p->next){
@@ -213,7 +213,7 @@ uintmax_t             mustache_prerender (mustache_api_t *api, void *userdata, m
 	}
 	return 1;
 } // }}}
-uintmax_t             mustache_render (mustache_api_t *api, void *userdata, mustache_template_t *template){ // {{{
+size_t             mustache_render (mustache_api_t *api, void *userdata, mustache_template_t *template){ // {{{
 	mustache_template_t            *p;
 
 	for(p = template; p; p = p->next){

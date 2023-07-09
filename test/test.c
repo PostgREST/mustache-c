@@ -1,10 +1,10 @@
-#include <stdint.h>
 #include <mustache.h>
 #include <stdio.h>
+#include <string.h>
 
 int error_flag;
 
-uintmax_t  tests_varget(mustache_api_t *api, void *userdata, mustache_token_variable_t *token){
+size_t  tests_varget(mustache_api_t *api, void *userdata, mustache_token_variable_t *token){
 	// hardcoded assignments: myvar = "VARIABLE"; mysecvar = "VARIABLE2"
 	if(strncmp("myvar", token->text, token->text_length) == 0){
 		return api->write(api, userdata, "VARIABLE", 8);
@@ -14,7 +14,7 @@ uintmax_t  tests_varget(mustache_api_t *api, void *userdata, mustache_token_vari
 	}
 	return 0; // error
 }
-uintmax_t  tests_sectget(mustache_api_t *api, void *userdata, mustache_token_section_t *token){
+size_t  tests_sectget(mustache_api_t *api, void *userdata, mustache_token_section_t *token){
 	if(strcmp("section", token->name) == 0){
 		// call render on inner section as many times as needed
 		// 'api' and 'userdata' can be redefined
@@ -22,7 +22,7 @@ uintmax_t  tests_sectget(mustache_api_t *api, void *userdata, mustache_token_sec
 	}
 	return 0; // error
 }
-void       tests_error(mustache_api_t *api, void *userdata, uintmax_t lineno, char const *error){
+void       tests_error(mustache_api_t *api, void *userdata, size_t lineno, char const *error){
 	fprintf(stderr, "error: %d: %s\n", (int)lineno, error);
 	error_flag = 1;
 }

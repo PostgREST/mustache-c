@@ -4,8 +4,6 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -18,17 +16,17 @@
 
 static FILE *template = NULL;
 
-static uintmax_t
-mustache_read_file(mustache_api_t *api, void *data, char *buf, uintmax_t sz)
+static size_t
+mustache_read_file(mustache_api_t *api, void *data, char *buf, size_t sz)
 {
     /* Do whatever needs to be done to get sz number of bytes into buf.
      */
     return fread(buf, sizeof(char), sz, template);
 }
 
-static uintmax_t
+static size_t
 mustache_write_stdout(mustache_api_t *api, void *data,
-                      char const *buf, uintmax_t sz)
+                      char const *buf, size_t sz)
 {
     /* Do whatever it takes to write sz number of bytes from buf to somewhere.
      */
@@ -37,12 +35,12 @@ mustache_write_stdout(mustache_api_t *api, void *data,
 
 static void
 mustache_error(mustache_api_t *api, void *data,
-               uintmax_t line, char const *error)
+               size_t line, char const *error)
 {
-    fprintf(stderr, "error in template: %" PRIu64  ": %s\n", line, error);
+    fprintf(stderr, "error in template: %zu: %s\n", line, error);
 }
 
-static uintmax_t
+static size_t
 mustache_sectget(mustache_api_t *api, void *data, mustache_token_section_t *s)
 {
     /* Compare to s->name and do section related stuff. This usually revolves
@@ -53,7 +51,7 @@ mustache_sectget(mustache_api_t *api, void *data, mustache_token_section_t *s)
     return mustache_render(api, data, s->section);
 }
 
-static uintmax_t
+static size_t
 mustache_varget(mustache_api_t *api, void *data, mustache_token_variable_t *t)
 {
     static const char *name = "Angus McFife";

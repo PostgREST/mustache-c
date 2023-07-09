@@ -1,7 +1,8 @@
 #ifndef MUSTACHE_H
 #define MUSTACHE_H
 
-#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 /** @file mustache.h */
 
@@ -19,7 +20,7 @@ typedef struct mustache_token_section_t   mustache_token_section_t;      ///< To
  * @retval 0      No more data (EOF)
  * @retval >0     Successful call, number indicate number of bytes read
  */
-typedef uintmax_t (*mustache_api_read)   (mustache_api_t *api, void *userdata, char *buffer, uintmax_t buffer_size);
+typedef size_t (*mustache_api_read)   (mustache_api_t *api, void *userdata, char *buffer, size_t buffer_size);
 
 /** Write callback. Save input data in desired place.
  * @param  api         Current api set
@@ -29,7 +30,7 @@ typedef uintmax_t (*mustache_api_read)   (mustache_api_t *api, void *userdata, c
  * @retval 0      Error occured
  * @retval >0     Successful call
  */
-typedef uintmax_t (*mustache_api_write)  (mustache_api_t *api, void *userdata, char const *buffer, uintmax_t buffer_size);
+typedef size_t (*mustache_api_write)  (mustache_api_t *api, void *userdata, char const *buffer, size_t buffer_size);
 
 /** Get variable callback. User call ->write api to dump variable value to output, or do nothing.
  * @param  api         Current api set
@@ -38,7 +39,7 @@ typedef uintmax_t (*mustache_api_write)  (mustache_api_t *api, void *userdata, c
  * @retval 0      Error occured
  * @retval >0     Successful call
  */
-typedef uintmax_t (*mustache_api_varget) (mustache_api_t *api, void *userdata, mustache_token_variable_t *token);
+typedef size_t (*mustache_api_varget) (mustache_api_t *api, void *userdata, mustache_token_variable_t *token);
 
 /** Get section callback. User call iterativly render routines on section, or do nothing.
  * @param  api         Current api set
@@ -47,7 +48,7 @@ typedef uintmax_t (*mustache_api_varget) (mustache_api_t *api, void *userdata, m
  * @retval 0      Error occured
  * @retval >0     Successful call
  */
-typedef uintmax_t (*mustache_api_sectget)(mustache_api_t *api, void *userdata, mustache_token_section_t  *token);
+typedef size_t (*mustache_api_sectget)(mustache_api_t *api, void *userdata, mustache_token_section_t  *token);
 
 /** Errors callback. Used only on compilation stage.
  * @param  api         Current api set
@@ -55,7 +56,7 @@ typedef uintmax_t (*mustache_api_sectget)(mustache_api_t *api, void *userdata, m
  * @param  lineno      Line number on which error occured
  * @param  error       Error description
  */
-typedef void      (*mustache_api_error)  (mustache_api_t *api, void *userdata, uintmax_t lineno, char const *error);
+typedef void      (*mustache_api_error)  (mustache_api_t *api, void *userdata, size_t lineno, char const *error);
 
 /** Free userdata callback.
  * @param  api         Current api set
@@ -72,15 +73,15 @@ typedef enum mustache_token_type_t {
 
 struct mustache_token_variable_t {
 	char                  *text;            ///< Text or variable name
-	uintmax_t              text_length;     ///< Text length or variable name length
-	int                    escaped;         ///< Whether token should be escaped
+	size_t              text_length;     ///< Text length or variable name length
+	bool                    escaped;         ///< Whether token should be escaped
 	void                  *userdata;        ///< Userdata
 };
 
 struct mustache_token_section_t {
 	char                  *name;            ///< Section name
 	mustache_token_t      *section;         ///< Section template
-	uintmax_t              inverted;        ///< Inverted section or not
+	bool                  inverted;        ///< Inverted section or not
 	void                  *userdata;        ///< Userdata
 };
 
@@ -121,7 +122,7 @@ mustache_template_t * mustache_compile(mustache_api_t *api, void *userdata);
  * @retval 0  Error occured
  * @retval >0 Successful call
  */
-uintmax_t             mustache_prerender(mustache_api_t *api, void *userdata, mustache_template_t *template);
+size_t             mustache_prerender(mustache_api_t *api, void *userdata, mustache_template_t *template);
 
 /** Render template
  * @param  api         Current api set
@@ -130,7 +131,7 @@ uintmax_t             mustache_prerender(mustache_api_t *api, void *userdata, mu
  * @retval 0  Error occured
  * @retval >0 Successful call
  */
-uintmax_t             mustache_render (mustache_api_t *api, void *userdata, mustache_template_t *template);
+size_t             mustache_render (mustache_api_t *api, void *userdata, mustache_template_t *template);
 
 /** Free template
  * @param  template    Template to free
@@ -143,11 +144,11 @@ void                  mustache_free   (mustache_api_t *api, mustache_template_t 
 typedef struct mustache_str_ctx {
 	char                  *string;       ///< String to read or write
 
-	uintmax_t              offset;       ///< Internal data. Current string offset.
+	size_t              offset;       ///< Internal data. Current string offset.
 } mustache_str_ctx;
 
-uintmax_t             mustache_std_strread  (mustache_api_t *api, void *userdata, char *buffer, uintmax_t buffer_size); ///< Helper api function to read from plain C string
-uintmax_t             mustache_std_strwrite (mustache_api_t *api, void *userdata, char const *buffer, uintmax_t buffer_size); ///< Helper api function to write to plain C string
+size_t             mustache_std_strread  (mustache_api_t *api, void *userdata, char *buffer, size_t buffer_size); ///< Helper api function to read from plain C string
+size_t             mustache_std_strwrite (mustache_api_t *api, void *userdata, char const *buffer, size_t buffer_size); ///< Helper api function to write to plain C string
 
 // debug api (build with --enable-debug, not default)
 void                  mustache_dump   (mustache_template_t *template); ///< Debug dump template

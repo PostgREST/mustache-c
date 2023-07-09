@@ -1,5 +1,4 @@
 %{
-#include <stdint.h>
 #include "mustache.h"
 #include "mustache-internal.h"
 #include "parser.tab.h"
