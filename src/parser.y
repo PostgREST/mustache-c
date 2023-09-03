@@ -61,7 +61,7 @@ tpl_tokens :
 
 tpl_token :
 	text {                                   // simple text
-		$$ = malloc(sizeof(mustache_token_t));
+		$$ = internal_mustache_malloc(sizeof(mustache_token_t));
 		$$->type                     = TOKEN_TEXT;
 		$$->token_simple.text        = $1;
 		$$->token_simple.text_length = strlen($1);
@@ -70,7 +70,7 @@ tpl_token :
 		$$->next                     = NULL;
 	}
 	| MUSTAG_NOESC_START text MUSTAG_NOESC_END {         // mustache escaped tag
-		$$ = malloc(sizeof(mustache_token_t));
+		$$ = internal_mustache_malloc(sizeof(mustache_token_t));
 		$$->type                     = TOKEN_VARIABLE;
 		$$->token_simple.text        = $2;
 		$$->token_simple.text_length = strlen($2);
@@ -79,7 +79,7 @@ tpl_token :
 		$$->next                     = NULL;
 	}
 	| MUSTAG_START text MUSTAG_END {         // mustache tag
-		$$ = malloc(sizeof(mustache_token_t));
+		$$ = internal_mustache_malloc(sizeof(mustache_token_t));
 		$$->type                     = TOKEN_VARIABLE;
 		$$->token_simple.text        = $2;
 		$$->token_simple.text_length = strlen($2);
@@ -88,7 +88,7 @@ tpl_token :
 		$$->next                     = NULL;
 	}
 	| MUSTAG_START '#' text MUSTAG_END tpl_tokens MUSTAG_START '/' text MUSTAG_END { // mustache section
-		$$ = malloc(sizeof(mustache_token_t));
+		$$ = internal_mustache_malloc(sizeof(mustache_token_t));
 		$$->type                   = TOKEN_SECTION;
 		$$->token_section.name     = $3;
 		$$->token_section.section  = $5;
@@ -98,10 +98,10 @@ tpl_token :
 
 		// We don't need the closing tag name and it was strdup'd earlier,
 		// free it now.
-		free($8);
+		internal_mustache_free($8);
 	}
 	| MUSTAG_START '^' text MUSTAG_END tpl_tokens MUSTAG_START '/' text MUSTAG_END { // mustache inverted section
-		$$ = malloc(sizeof(mustache_token_t));
+		$$ = internal_mustache_malloc(sizeof(mustache_token_t));
 		$$->type                   = TOKEN_SECTION;
 		$$->token_section.name     = $3;
 		$$->token_section.section  = $5;
@@ -111,7 +111,7 @@ tpl_token :
 
 		// We don't need the closing tag name and it was strdup'd earlier,
 		// free it now.
-		free($8);
+		internal_mustache_free($8);
 	}
 	;
 
@@ -124,11 +124,11 @@ text :
 
 		len1 = strlen($1);
 		len2 = strlen($2);
-		$1   = realloc($1, len1 + len2 + 1);
+		$1   = internal_mustache_realloc($1, len1 + len2 + 1);
 		memcpy($1 + len1, $2, len2 + 1);
 
 		$$  = $1;
-		free($2);
+		internal_mustache_free($2);
 	}
 
 %%
@@ -155,7 +155,7 @@ size_t             mustache_std_strread(mustache_api_t *api, void *userdata, cha
 size_t             mustache_std_strwrite(mustache_api_t *api, void *userdata, char const *buffer, size_t buffer_size){ // {{{
 	mustache_str_ctx      *ctx               = (mustache_str_ctx *)userdata;
 
-	ctx->string = realloc(ctx->string, ctx->offset + buffer_size + 1);
+	ctx->string = internal_mustache_realloc(ctx->string, ctx->offset + buffer_size + 1);
 
 	memcpy(ctx->string + ctx->offset, buffer, buffer_size);
 	ctx->string[ctx->offset + buffer_size] = '\0';
@@ -172,7 +172,7 @@ mustache_template_t * mustache_compile(mustache_api_t *api, void *userdata){ // 
 	size_t              ret;
 
 	while(1){
-		content       = realloc(content, content_off + 1024 + 2); // 2 for terminating EOF of yy
+		content       = internal_mustache_realloc(content, content_off + 1024 + 2); // 2 for terminating EOF of yy
 		if(!content)
 			break;
 
@@ -190,7 +190,7 @@ mustache_template_t * mustache_compile(mustache_api_t *api, void *userdata){ // 
 		yyparse(&ctx);
 
 		mustache_p_lex_destroy();
-		free(content);
+		internal_mustache_free(content);
 	}
 	return ctx.template;
 } // }}}
@@ -245,7 +245,7 @@ void                  mustache_free   (mustache_api_t *api, mustache_template_t 
 					api->freedata(api, p->token_simple.userdata);
 
 				if(p->token_simple.text)
-					free(p->token_simple.text);
+					internal_mustache_free(p->token_simple.text);
 				break;
 			case TOKEN_SECTION:
 				if(p->token_section.userdata && api->freedata)
@@ -253,11 +253,11 @@ void                  mustache_free   (mustache_api_t *api, mustache_template_t 
 
 				mustache_free(api, p->token_section.section);
 				if(p->token_section.name)
-					free(p->token_section.name);
+					internal_mustache_free(p->token_section.name);
 				break;
 		};
 		n = p->next;
-		free(p);
+		internal_mustache_free(p);
 	}
 } // }}}
 

@@ -2,6 +2,7 @@
 #include "mustache.h"
 #include "mustache-internal.h"
 #include "parser.tab.h"
+
 %}
 
 %option noyywrap
@@ -25,9 +26,9 @@ special     [#^/]
 <comment>"*"+"/"        BEGIN(INITIAL);
 
 <mustag>{special}     { return *yytext; }
-<mustag>{name}        { yylval->text = strdup(yytext); return TEXT; }
-<mustag>"}}"          {	BEGIN(INITIAL); return MUSTAG_END;  }
-<mustag>"}}}"          {	BEGIN(INITIAL); return MUSTAG_NOESC_END;  }
+<mustag>{name}        { yylval->text = mustache_strdup(yytext); return TEXT; }
+<mustag>"}}"          { BEGIN(INITIAL); return MUSTAG_END;  }
+<mustag>"}}}"         { BEGIN(INITIAL); return MUSTAG_NOESC_END;  }
 
 "//"+[^\n]*           {                 }
 "/*"                  { BEGIN(comment); }
@@ -35,7 +36,6 @@ special     [#^/]
 "{{{"                 { BEGIN(mustag); return MUSTAG_NOESC_START; }
 
 "{" |
-[^{]*                 { yylval->text = strdup(yytext); return TEXT;  }
+[^{]*                 { yylval->text = mustache_strdup(yytext); return TEXT;  }
 
 %%
-

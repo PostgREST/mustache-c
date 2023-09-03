@@ -10,8 +10,8 @@ SOFLAGS = -shared -Wl,-soname,libmustache_c.so
 
 lib: build/libmustache_c.so
 
-build/libmustache_c.so : build/parser.tab.o build/parser.lex.o include/mustache-internal.h include/mustache.h include/parser.tab.h
-	$(CC) $(CFLAGS) ${SOFLAGS} build/parser.tab.o build/parser.lex.o -o $@
+build/libmustache_c.so : build/mustache.o build/parser.tab.o build/parser.lex.o
+	$(CC) $(CFLAGS) ${SOFLAGS} build/mustache.o build/parser.tab.o build/parser.lex.o -o $@
 
 build/parser.lex.o : build/parser.lex.c include/parser.tab.h
 
@@ -24,6 +24,10 @@ include/parser.tab.h build/parser.tab.c : src/parser.y
 build/parser.lex.c : src/parser.l
 	$(dir_guard)
 	flex -t $? > $@
+
+build/mustache.o : src/mustache.c
+	$(dir_guard)
+	$(CC) $(CFLAGS) -c $? -o $@
 
 .PHONY: clean
 clean:
